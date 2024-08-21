@@ -1,9 +1,34 @@
 #include <stdio.h>
+#include <string.h>
 #include <GL\glew.h>
 #include <GLFW\glfw3.h>
 #include <iostream>
 
 const GLint WIDTH = 800, HEIGHT = 600;
+
+GLuint VAO, VBO, shaderProgram;
+
+//Vertex Shader
+static const char* vShader = "                  \n\
+#version 330                                    \n\
+                                                \n\
+layout(location=0) in vec2 pos;                 \n\
+                                                \n\
+void main(){                                    \n\
+  gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);   \n\
+}";
+
+//Fragment Shader
+static const char* fShader = "                  \n\
+#version 330                                    \n\
+                                                \n\
+uniform vec3 triangleColor;                     \n\
+                                                \n\
+out vec4 color;                                 \n\
+                                                \n\
+void main(){                                    \n\
+  color = vec4(triangleColor, 1.0);             \n\
+}";
 
 int main()
 {
