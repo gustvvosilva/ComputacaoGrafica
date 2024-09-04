@@ -8,22 +8,26 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <vector>
+#include "Mesh.h"
 
 const GLint WIDTH = 800, HEIGHT = 600;
 
-GLuint VAO, VBO, IBO, shaderProgram;
+GLuint shaderProgram;
+std::vector<Mesh*> listMesh;
+
 
 //Vertex Shader
 static const char* vShader = "                  \n\
 #version 330                                    \n\
                                                 \n\
 layout(location=0) in vec3 pos;                 \n\
-uniform mat4 model; \n\
-out vec4 vColor; \n\
+uniform mat4 model;                             \n\
+out vec4 vColor;                                \n\
                                                 \n\
 void main(){                                    \n\
-  gl_Position = model * vec4(pos, 1.0); \n\
-  vColor = vec4(clamp(pos, 0.0f, 1.0f), 1.0f); \n\
+  gl_Position = model * vec4(pos, 1.0);         \n\
+  vColor = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);  \n\
 }";
 
 //Fragment Shader
@@ -31,11 +35,11 @@ static const char* fShader = "                  \n\
 #version 330                                    \n\
                                                 \n\
 uniform vec3 triangleColor;                     \n\
-in vec4 vColor; \n\
+in vec4 vColor;                                 \n\
 out vec4 color;                                 \n\
                                                 \n\
 void main(){                                    \n\
-  color = vColor; \n\
+  color = vColor;                               \n\
 }";
 
 void CreateTriagle() {
@@ -54,36 +58,15 @@ void CreateTriagle() {
 		0, 2, 3
 	};
 
-	//VAO
-	glGenVertexArrays(1, &VAO); //Gera um VAO ID
-	glBindVertexArray(VAO); //Atribuindo o ID ao VAO
+	Mesh* triangulo1 = new Mesh();
+	triangulo1->CreateMesh(vertices, sizeof(vertices),
+						   indices, sizeof(indices));
+	listMesh.push_back(triangulo1);
 
-	glGenBuffers(1, &IBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	//Carregar os dados de vértice para a placa de vídeo
-	//Vertex Buffer Object: VBO
-	glGenBuffers(1, &VBO); //Gera um VBO ID
-	glBindBuffer(GL_ARRAY_BUFFER, VBO); //Transforma o VBO em um Array Buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //Copia os dados ao VBO
-
-	//GL_STATIC_DRAW: Os dados do vértice serão carregados uma vez e desenhados várias vezes (por exemplo, o mundo).
-	//GL_DYNAMIC_DRAW: Os dados do vértice serão criados uma vez, alterados de tempos em tempos, mas desenhados muitas vezes mais do que isso.
-	//GL_STREAM_DRAW : Os dados do vértice serão carregados uma vez e desenhados uma vez.
-
-	//Vertex Attribute Pointer - Atributos dos dados na memória
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); //0: shader location | 2: numero de valores de vertice (x,y) | GL_FLOAT: tipo dos valores
-	//GL_FALSE: normalizado | 0: pular elemento (cor) | 0: offset
-//Vertex Attribute Pointer Enable
-	glEnableVertexAttribArray(0); //0: shader location
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	//Limpar o Buffer
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	//Limpar o Vertex Array
-	glBindVertexArray(0);
+	Mesh* triangulo2 = new Mesh();
+	triangulo2->CreateMesh(vertices, sizeof(vertices),
+		indices, sizeof(indices));
+	listMesh.push_back(triangulo2);
 }
 
 void AddShader(GLuint program, const char* shaderCode, GLenum shaderType) {
@@ -200,7 +183,6 @@ int main()
 	float size = 0.4f, maxSize = 0.7f, minSize = -0.7f, incSize = 0.01f;
 	float angle = 0.0f, maxAngle = 360.0f, minAngle = -1.0f, incAngle = 0.5f;
 
-
 	//Loop until the window close
 	while (!glfwWindowShouldClose(window)) {
 		//Get + Handle user input events
@@ -212,13 +194,8 @@ int main()
 
 		//Desenhar o triangulo
 		glUseProgram(shaderProgram); //Busca o programa que está com o shader (triangulo)
-		glBindVertexArray(VAO); //Bind o VAO
 
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-			glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
+		listMesh[0]->RenderMesh();
 
 		GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor"); //procura a entrada chamada triangleColor
 		float r = (float)rand()/RAND_MAX;
@@ -243,9 +220,7 @@ int main()
 		angle += angleDirection ? incAngle : incAngle * -1;
 
 
-
 		glm::mat4 model(1.0f);
-
 
 
 		//Movimentações do triangulo
@@ -259,6 +234,23 @@ int main()
 
 		GLuint uniModel = glGetUniformLocation(shaderProgram, "model");
 		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+
+
+		listMesh[1]->RenderMesh();
+
+		glm::mat4 model2(1.0f);
+
+		//Movimentações do triangulo
+		model2 = glm::translate(model2, glm::vec3(-triOffset, -triOffset, 0.0f));
+
+		//Tamanho do triangulo
+		model2 = glm::scale(model2, glm::vec3(0.2, 0.2, 0.2));
+
+		//Rotação
+		model2 = glm::rotate(model2, glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
+
+		GLuint uniModel2 = glGetUniformLocation(shaderProgram, "model");
+		glUniformMatrix4fv(uniModel2, 1, GL_FALSE, glm::value_ptr(model2));
 
 		//auto t_now = std::chrono::high_resolution_clock::now();
 		//float time = std::chrono::duration_cast<std::chrono::duration<float>>(t_now - t_start).count();
