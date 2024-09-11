@@ -45,17 +45,31 @@ void main(){                                    \n\
 void CreateTriagle() {
 	//1. Definir os pontos dos vértices
 	GLfloat vertices[] = {
-		-1.0f, -1.0f, 0.0f, //v0 preto
-		0.0f, 1.0f, 0.0f, //v1 verde
-		1.0f, -1.0f, 0.0f, //v2 vermelho
-		0.0f, 0.0f, 1.0f //v3 azul
+		-1.0f, 1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, 1.0f,
+		1.0f, 1.0f, -1.0f,
+		1.0f, 1.0f, 1.0f
 	};
 
 	GLuint indices[] = {
 		0, 1, 2,
-		1, 2, 3,
-		0, 1, 3,
-		0, 2, 3
+		3, 4, 5,
+		0, 1, 4,
+		0, 3, 4,
+		1, 2, 5,
+		1, 4, 5,
+		0, 2, 3,
+		2, 3, 5,
+		0, 2, 6,
+		3, 5, 7,
+		0, 6, 7,
+		0, 3, 7,
+		2, 6, 7,
+		2, 5, 7
 	};
 
 	Mesh* triangulo1 = new Mesh();
@@ -230,7 +244,7 @@ int main()
 		model = glm::scale(model, glm::vec3(0.4, 0.4, 0.4));
 
 		//Rotação
-		model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 1.0f, 0.0f));
 
 		GLuint uniModel = glGetUniformLocation(shaderProgram, "model");
 		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -247,7 +261,7 @@ int main()
 		model2 = glm::scale(model2, glm::vec3(0.2, 0.2, 0.2));
 
 		//Rotação
-		model2 = glm::rotate(model2, glm::radians(angle), glm::vec3(1.0f, 0.0f, 0.0f));
+		model2 = glm::rotate(model2, glm::radians(angle), glm::vec3(1.0f, 1.0f, 1.0f));
 
 		GLuint uniModel2 = glGetUniformLocation(shaderProgram, "model");
 		glUniformMatrix4fv(uniModel2, 1, GL_FALSE, glm::value_ptr(model2));
