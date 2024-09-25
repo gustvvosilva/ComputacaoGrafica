@@ -1,4 +1,4 @@
-#include <GL\glew.h>
+#include <GL/glew.h>
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -14,12 +14,13 @@ public:
 
 	GLint GetUniformProjection() { return uniformProjection; };
 	GLint GetUniformModel() { return uniformModel; };
+	GLint GetUniformView() { return uniformView; };
 
 private:
 	GLuint shaderId;
-	GLint uniformProjection, uniformModel;
+	GLint uniformProjection, uniformModel, uniformView;
 
 	std::string ReadFile(const char* fileLocation);
 	void Compile(const char* vertexCode, const char* fragmentCode);
-};
 
+};
